@@ -1,0 +1,7 @@
+db.sqlite3
+geckodriver.log
+polls_venv
+__pycache__
+*.pyc
+/static
+.env
