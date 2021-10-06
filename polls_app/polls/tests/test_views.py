@@ -90,7 +90,7 @@ class QuestionIndexViewTests(TestCase):
         )
 
 
-class DetailPageTest(TestCase):
+class QuestionDetailViewTests(TestCase):
 
     def test_root_view_resolves_to_home_page_view(self):
         question = Question.objects.create(
@@ -109,3 +109,25 @@ class DetailPageTest(TestCase):
         
         response = self.client.get(reverse('polls:detail', kwargs={'pk': 1}))
         self.assertTemplateUsed(response, 'polls/detail.html')
+
+    def test_future_question(self):
+        """
+        The detail view of a question with a pub_date in the future
+        returns a 404 not found.
+        """
+        future_question = create_question(question_text='Future question.', days=5)
+        url = reverse('polls:detail', args=(future_question.id,))
+        response = self.client.get(url)
+
+        self.assertQuerysetEqual(response.status_code, 404)
+
+    def test_past_question(self):
+        """
+        The detail view of a question with a pub_date in the past
+        displays the question's text.
+        """
+        past_question = create_question(question_text='Past Question.', days=-5)
+        url = reverse('polls:detail',args=(past_question.id))
+        response = self.client.get(url)
+
+        self.assertContains(response, past_question.question_text)
