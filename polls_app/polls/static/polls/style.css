@@ -1,0 +1,10 @@
+li a {
+  color: green;
+}
+
+body {
+  background-color: #ffffff;
+  background-image: url("images/rainbow-vortex.svg");
+  background-attachment: fixed;
+  background-size: cover;
+}
