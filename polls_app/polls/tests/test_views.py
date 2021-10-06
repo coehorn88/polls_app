@@ -3,7 +3,7 @@ from django.urls import reverse, resolve
 from django.utils import timezone
 import datetime
 
-from polls.views import IndexView, DetailView
+from polls.views import IndexView, DetailView, ResultsView
 from polls.models import Question
 from .utils import create_question
 
@@ -82,20 +82,14 @@ class QuestionIndexViewTests(TestCase):
 
 class QuestionDetailViewTests(TestCase):
 
-    def test_root_view_resolves_to_home_page_view(self):
-        question = Question.objects.create(
-                question_text = "Test Question", 
-                pub_date = timezone.now(),
-            ).save()
+    def test_detail_view_resolves_to_details_page_view(self):
+        question = create_question()
 
         found = resolve('/polls/1/')
         self.assertEqual(found.func.view_class, DetailView) 
 
     def test_uses_detail_template(self):
-        question = Question.objects.create(
-                question_text = "Test Question", 
-                pub_date = timezone.now(),
-            ).save()
+        question = create_question()
         
         response = self.client.get(reverse('polls:detail', kwargs={'pk': 1}))
         self.assertTemplateUsed(response, 'polls/detail.html')
@@ -119,6 +113,44 @@ class QuestionDetailViewTests(TestCase):
         """
         past_question = create_question(question_text='Past Question.', days=-5)
         url = reverse('polls:detail',args=(past_question.id,))
+        response = self.client.get(url)
+
+        self.assertContains(response, past_question.question_text)
+
+
+class QuizResultslViewTests(TestCase):
+
+    def test_results_view_resolves_to_home_page_view(self):
+        question = create_question()
+        found = resolve('/polls/1/results/')
+
+        self.assertEqual(found.func.view_class, ResultsView) 
+
+    def test_uses_results_template(self):
+        question = create_question()
+        
+        response = self.client.get(reverse('polls:results', kwargs={'pk': 1}))
+        self.assertTemplateUsed(response, 'polls/results.html')
+
+    def test_results_view_returns_no_future_question(self):
+        """
+        The detail view of a question with a pub_date in the future
+        returns a 404 not found.
+        """
+        future_question = create_question(question_text='Future question.', days=5)
+        url = reverse('polls:results', args=(future_question.id,))
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_results_view_returns_past_question(self):
+        """
+        The detail view of a question with a pub_date in the past
+        displays the question's text.
+        """
+        past_question = create_question(question_text='Past Question.', days=-5)
+        url = reverse('polls:results',args=(past_question.id,))
         response = self.client.get(url)
 
         self.assertContains(response, past_question.question_text)
