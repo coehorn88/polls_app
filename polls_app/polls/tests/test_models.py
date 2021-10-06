@@ -3,23 +3,17 @@ from django.utils import timezone
 import datetime
 
 from polls.models import Question, Choice
+from .utils import create_question
+
 
 class QuestionModelTest(TestCase):
 
-    def create_question(self, question_text = "Test Question"):
-        question = Question.objects.create(
-            question_text = question_text, 
-            pub_date = timezone.now(),
-        )
-
-        return question
-
     def test_can_save_quiz(self):
         ### Setup ###
-        first_question = self.create_question()
+        first_question = create_question()
         first_question.save()
 
-        second_question = self.create_question()
+        second_question = create_question()
         second_question.save()
 
         ### Assertion ###
@@ -28,16 +22,16 @@ class QuestionModelTest(TestCase):
 
 
     def test_string_representation(self):
-        question = self.create_question()
+        question = create_question()
         self.assertEqual(str(question), 'Test Question')
 
     def test_was_published_recently(self):
-        question = self.create_question()
+        question = create_question()
         self.assertEqual(question.was_published_recently(), True)
 
     def test_item_is_related_to_list(self):
         ### Setup ###
-        question = self.create_question()
+        question = create_question()
         choice = Choice.objects.create(question_id=1, choice_text='Choice1', votes=0)
         choice.question = question
         question.save()
