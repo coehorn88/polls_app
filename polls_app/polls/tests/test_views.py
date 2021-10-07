@@ -11,6 +11,7 @@ from .utils import create_question
 class QuestionIndexViewTests(TestCase):
 
     # TODO - exclude from publishing questions without choices 
+    # TODO - Upon completion package the app: https://docs.djangoproject.com/en/3.2/intro/reusable-apps/
 
     def test_question_index_view_resolves_to_home_page_view(self):
         found = resolve('/polls/')
